@@ -62,8 +62,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 {auth.role === "admin" ? "Администратор" : "Игрок"}
               </div>
             </div>
-            <Button variant="ghost" size="icon" onClick={handleLogout}>
+            <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
               <LogOut className="size-4" />
+              Выйти
             </Button>
           </div>
         </div>
