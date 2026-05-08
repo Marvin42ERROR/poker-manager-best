@@ -20,7 +20,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const handleLogout = () => {
     logout();
-    router.navigate({ to: "/login" });
+    // Hard redirect — clears any in-memory route state so protected URLs
+    // can't be reached via back/forward without re-authenticating.
+    if (typeof window !== "undefined") {
+      window.location.replace("/login");
+    } else {
+      router.navigate({ to: "/login" });
+    }
   };
 
   return (
