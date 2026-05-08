@@ -114,6 +114,7 @@ function LoginPage() {
                 {showPwd ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
               </button>
             </div>
+          </div>
           {err && (
             <div
               role="alert"
