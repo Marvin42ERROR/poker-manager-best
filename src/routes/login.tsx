@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Spade } from "lucide-react";
+import { PokerLogo } from "@/components/PokerLogo";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -33,11 +33,11 @@ function LoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <Card className="w-full max-w-md p-8 bg-card/80 backdrop-blur border-border/60">
         <div className="flex flex-col items-center mb-6">
-          <div className="size-14 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-            <Spade className="size-7 text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold">Покерный Менеджер</h1>
-          <p className="text-sm text-muted-foreground mt-1">Вход в закрытый клуб</p>
+          <PokerLogo size={104} />
+          <h1 className="font-fancy text-6xl leading-none mt-2">Poker Manager</h1>
+          <p className="text-sm text-muted-foreground mt-3 tracking-wide uppercase">
+            Private Club Access
+          </p>
         </div>
         <form onSubmit={submit} className="space-y-4">
           <div>
