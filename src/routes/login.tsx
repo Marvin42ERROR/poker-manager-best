@@ -33,7 +33,7 @@ function LoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <Card className="w-full max-w-md p-8 bg-card/80 backdrop-blur border-border/60">
         <div className="flex flex-col items-center mb-6">
-          <h1 className="font-fancy text-6xl leading-none mb-2 text-center font-serif font-extrabold my-0 mx-0 px-0 py-0 border-0">Poker Manager</h1>
+          <h1 className="font-fancy text-6xl leading-none mb-2 font-serif font-extrabold my-0 mx-0 px-0 py-0 border-0 text-black text-center">Poker Manager</h1>
           <PokerLogo size={104} />
           <p className="text-sm text-muted-foreground mt-3 tracking-wide uppercase">
             Private Club Access
