@@ -1,6 +1,16 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import url("https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Cinzel+Decorative:wght@700;900&display=swap");
+
+.font-fancy {
+  font-family: "Pinyon Script", "Cinzel Decorative", cursive;
+  background: linear-gradient(135deg, #f5d77a 0%, #c9a24a 50%, #8a6a1f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 0.02em;
+}
 
 @custom-variant dark (&:is(.dark *));
 
