@@ -91,7 +91,6 @@ function LoginPage() {
             />
           </div>
           <div>
-            <Label htmlFor="p">Пароль</Label>
             <div className="relative">
               <Input
                 id="p"
@@ -101,8 +100,11 @@ function LoginPage() {
                   setP(e.target.value);
                   if (errFields.p) setErrFields((f) => ({ ...f, p: false }));
                 }}
+                placeholder="Password"
                 aria-invalid={errFields.p}
-                className={`pr-10 transition-colors ${errFields.p ? errCls : ""}`}
+                className={`h-12 text-xl text-left px-[12px] py-[8px] pr-12 placeholder:text-muted-foreground/60 transition-colors ${
+                  errFields.p ? errCls : "opacity-75 border-double"
+                }`}
               />
               <button
                 type="button"
@@ -111,7 +113,7 @@ function LoginPage() {
                 aria-pressed={showPwd}
                 className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground transition-colors"
               >
-                {showPwd ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                {showPwd ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
               </button>
             </div>
           </div>
