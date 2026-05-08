@@ -92,18 +92,28 @@ function LoginPage() {
           </div>
           <div>
             <Label htmlFor="p">Пароль</Label>
-            <Input
-              id="p"
-              type="password"
-              value={p}
-              onChange={(e) => {
-                setP(e.target.value);
-                if (errFields.p) setErrFields((f) => ({ ...f, p: false }));
-              }}
-              aria-invalid={errFields.p}
-              className={`transition-colors ${errFields.p ? errCls : ""}`}
-            />
-          </div>
+            <div className="relative">
+              <Input
+                id="p"
+                type={showPwd ? "text" : "password"}
+                value={p}
+                onChange={(e) => {
+                  setP(e.target.value);
+                  if (errFields.p) setErrFields((f) => ({ ...f, p: false }));
+                }}
+                aria-invalid={errFields.p}
+                className={`pr-10 transition-colors ${errFields.p ? errCls : ""}`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPwd((v) => !v)}
+                aria-label={showPwd ? "Скрыть пароль" : "Показать пароль"}
+                aria-pressed={showPwd}
+                className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showPwd ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+              </button>
+            </div>
           {err && (
             <div
               role="alert"
