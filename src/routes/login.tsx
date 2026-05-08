@@ -41,8 +41,14 @@ function LoginPage() {
         </div>
         <form onSubmit={submit} className="space-y-4">
           <div>
-            <Label htmlFor="u">Логин</Label>
-            <Input id="u" value={u} onChange={(e) => setU(e.target.value)} autoFocus />
+            <Input
+              id="u"
+              value={u}
+              onChange={(e) => setU(e.target.value)}
+              placeholder="Login"
+              autoFocus
+              className="h-12 py-2 text-lg placeholder:text-muted-foreground/60"
+            />
           </div>
           <div>
             <Label htmlFor="p">Пароль</Label>
