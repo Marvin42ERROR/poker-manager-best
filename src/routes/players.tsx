@@ -13,7 +13,10 @@ import { User } from "lucide-react";
 export const Route = createFileRoute("/players")({
   component: PlayersPage,
   beforeLoad: () => {
-    if (typeof window !== "undefined" && !getAuth()) throw redirect({ to: "/login" });
+    if (typeof window === "undefined") return;
+    const a = getAuth();
+    if (!a) throw redirect({ to: "/login" });
+    if (a.role !== "admin") throw redirect({ to: "/games" });
   },
 });
 
