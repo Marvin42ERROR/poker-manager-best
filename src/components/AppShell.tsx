@@ -20,7 +20,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const handleLogout = () => {
     logout();
-    router.navigate({ to: "/login" });
+    // Hard redirect — clears any in-memory route state so protected URLs
+    // can't be reached via back/forward without re-authenticating.
+    if (typeof window !== "undefined") {
+      window.location.replace("/login");
+    } else {
+      router.navigate({ to: "/login" });
+    }
   };
 
   return (
@@ -56,8 +62,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 {auth.role === "admin" ? "Администратор" : "Игрок"}
               </div>
             </div>
-            <Button variant="ghost" size="icon" onClick={handleLogout}>
+            <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
               <LogOut className="size-4" />
+              Выйти
             </Button>
           </div>
         </div>
