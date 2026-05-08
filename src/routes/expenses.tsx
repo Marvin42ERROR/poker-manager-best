@@ -78,7 +78,7 @@ function ExpensesPage() {
 
       <Card className="p-6 bg-card/70 border-border/60">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="flex items-center gap-3 text-2xl font-semibold">
+          <h2 className="flex items-center gap-3 text-3xl font-serif font-medium text-left text-red-600 mx-0 mb-0 mr-0 my-[20px] py-0 px-0">
             <span>Расходы</span>
             <span className="h-6 w-px bg-zinc-700" />
             <span className="text-3xl font-bold">
