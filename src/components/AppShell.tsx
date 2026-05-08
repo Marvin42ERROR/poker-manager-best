@@ -3,12 +3,13 @@ import { useAuth, logout } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { LogOut, Spade } from "lucide-react";
 
-const NAV = [
+type Role = "admin" | "player";
+const NAV: { to: "/games" | "/players" | "/expenses" | "/cash"; label: string; roles: Role[] }[] = [
   { to: "/games", label: "Игры", roles: ["admin", "player"] },
   { to: "/players", label: "Досье", roles: ["admin"] },
   { to: "/expenses", label: "Затраты", roles: ["admin"] },
   { to: "/cash", label: "Итоговый кэш", roles: ["admin"] },
-] as const;
+];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
