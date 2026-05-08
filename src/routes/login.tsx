@@ -22,6 +22,7 @@ function LoginPage() {
   const [p, setP] = useState("");
   const [err, setErr] = useState("");
   const [errFields, setErrFields] = useState<{ u: boolean; p: boolean }>({ u: false, p: false });
+  const [showPwd, setShowPwd] = useState(false);
   const navigate = Route.useNavigate();
 
   const submit = (e: React.FormEvent) => {
