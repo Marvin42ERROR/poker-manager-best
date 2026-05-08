@@ -5,11 +5,14 @@
 
 .font-fancy {
   font-family: "Pinyon Script", "Cinzel Decorative", cursive;
-  background: linear-gradient(135deg, #f5d77a 0%, #c9a24a 50%, #8a6a1f 100%);
+  background: linear-gradient(135deg, #d8b75a 0%, #a8842f 50%, #6b500f 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: 0.02em;
+  line-height: 1.35;
+  padding-bottom: 0.15em;
+  display: inline-block;
 }
 
 @custom-variant dark (&:is(.dark *));
