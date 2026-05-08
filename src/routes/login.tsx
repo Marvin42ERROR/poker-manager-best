@@ -43,11 +43,12 @@ function LoginPage() {
           <div>
             <Input
               id="u"
+              type="text"
               value={u}
               onChange={(e) => setU(e.target.value)}
               placeholder="Login"
               autoFocus
-              className="h-12 py-2 text-lg placeholder:text-muted-foreground/60"
+              className="h-12 text-xl text-left opacity-75 border-double px-[12px] py-[8px] placeholder:text-muted-foreground/60"
             />
           </div>
           <div>
