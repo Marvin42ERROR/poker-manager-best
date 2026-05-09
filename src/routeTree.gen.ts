@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SelectClubRouteImport } from './routes/select-club'
 import { Route as PlayersRouteImport } from './routes/players'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as GamesRouteImport } from './routes/games'
@@ -16,6 +17,11 @@ import { Route as ExpensesRouteImport } from './routes/expenses'
 import { Route as CashRouteImport } from './routes/cash'
 import { Route as IndexRouteImport } from './routes/index'
 
+const SelectClubRoute = SelectClubRouteImport.update({
+  id: '/select-club',
+  path: '/select-club',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlayersRoute = PlayersRouteImport.update({
   id: '/players',
   path: '/players',
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
   '/players': typeof PlayersRoute
+  '/select-club': typeof SelectClubRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
   '/players': typeof PlayersRoute
+  '/select-club': typeof SelectClubRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,12 +79,27 @@ export interface FileRoutesById {
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
   '/players': typeof PlayersRoute
+  '/select-club': typeof SelectClubRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/cash' | '/expenses' | '/games' | '/login' | '/players'
+  fullPaths:
+    | '/'
+    | '/cash'
+    | '/expenses'
+    | '/games'
+    | '/login'
+    | '/players'
+    | '/select-club'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/cash' | '/expenses' | '/games' | '/login' | '/players'
+  to:
+    | '/'
+    | '/cash'
+    | '/expenses'
+    | '/games'
+    | '/login'
+    | '/players'
+    | '/select-club'
   id:
     | '__root__'
     | '/'
@@ -85,6 +108,7 @@ export interface FileRouteTypes {
     | '/games'
     | '/login'
     | '/players'
+    | '/select-club'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -94,10 +118,18 @@ export interface RootRouteChildren {
   GamesRoute: typeof GamesRoute
   LoginRoute: typeof LoginRoute
   PlayersRoute: typeof PlayersRoute
+  SelectClubRoute: typeof SelectClubRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/select-club': {
+      id: '/select-club'
+      path: '/select-club'
+      fullPath: '/select-club'
+      preLoaderRoute: typeof SelectClubRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/players': {
       id: '/players'
       path: '/players'
@@ -150,7 +182,18 @@ const rootRouteChildren: RootRouteChildren = {
   GamesRoute: GamesRoute,
   LoginRoute: LoginRoute,
   PlayersRoute: PlayersRoute,
+  SelectClubRoute: SelectClubRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

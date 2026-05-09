@@ -1,15 +1,19 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
-import { login, getAuth } from "@/lib/auth";
+import { signIn, signUp, getAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { PokerLogo } from "@/components/PokerLogo";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ShieldAlert } from "lucide-react";
+
+type SearchParams = { expired?: string };
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
+  validateSearch: (s: Record<string, unknown>): SearchParams => ({
+    expired: typeof s.expired === "string" ? s.expired : undefined,
+  }),
   beforeLoad: () => {
     if (typeof window !== "undefined" && getAuth()) {
       throw redirect({ to: "/games" });
@@ -18,105 +22,165 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const [u, setU] = useState("");
-  const [p, setP] = useState("");
-  const [err, setErr] = useState("");
-  const [errFields, setErrFields] = useState<{ u: boolean; p: boolean }>({ u: false, p: false });
-  const [showPwd, setShowPwd] = useState(false);
+  const search = Route.useSearch();
   const navigate = Route.useNavigate();
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const login_ = u.trim();
-    if (!login_ && !p) {
-      setErr("Введите логин и пароль");
-      setErrFields({ u: true, p: true });
-      return;
-    }
-    if (!login_) {
-      setErr("Введите логин");
-      setErrFields({ u: true, p: false });
-      return;
-    }
-    if (!p) {
-      setErr("Введите пароль");
-      setErrFields({ u: false, p: true });
-      return;
-    }
-    const known = login_ === "admin" || login_ === "player";
-    if (!known) {
-      setErr(`Пользователь «${login_}» не найден. Используйте admin или player.`);
-      setErrFields({ u: true, p: false });
-      return;
-    }
-    const a = login(login_, p);
-    if (!a) {
-      setErr("Неверный пароль для этого пользователя");
-      setErrFields({ u: false, p: true });
-      return;
-    }
-    setErr("");
-    setErrFields({ u: false, p: false });
-    navigate({ to: "/games" });
-  };
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [email, setEmail] = useState("");
+  const [pwd, setPwd] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [clubName, setClubName] = useState("");
+  const [showPwd, setShowPwd] = useState(false);
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  const errCls = "border-destructive ring-1 ring-destructive/60 bg-destructive/5";
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErr("");
+    setBusy(true);
+    try {
+      if (mode === "signin") {
+        const r = await signIn(email.trim(), pwd);
+        if (!r.ok) {
+          setErr(r.error);
+          return;
+        }
+      } else {
+        if (!displayName.trim()) {
+          setErr("Укажите ваше имя");
+          return;
+        }
+        const r = await signUp({
+          email: email.trim(),
+          password: pwd,
+          displayName: displayName.trim(),
+          clubName: clubName.trim(),
+        });
+        if (!r.ok) {
+          setErr(r.error);
+          return;
+        }
+      }
+      const a = getAuth();
+      if (a?.isCreator && !a.activeClubId) {
+        navigate({ to: "/select-club" });
+      } else {
+        navigate({ to: "/games" });
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <Card className="w-full max-w-md p-8 bg-card/80 backdrop-blur border-border/60">
         <div className="flex flex-col items-center mb-6">
-          <h1 className="font-fancy text-6xl leading-none mb-2 font-serif font-extrabold my-0 mx-0 px-0 py-0 border-0 text-black text-center">Poker Manager</h1>
-          <PokerLogo size={104} />
+          <h1 className="font-fancy text-5xl leading-none mb-2 font-serif font-extrabold text-black text-center">
+            Poker Manager
+          </h1>
+          <PokerLogo size={88} />
           <p className="text-sm text-muted-foreground mt-3 tracking-wide uppercase">
             Private Club Access
           </p>
         </div>
-        <form onSubmit={submit} className="space-y-4" noValidate>
-          <div>
-            <Input
-              id="u"
-              type="text"
-              value={u}
-              onChange={(e) => {
-                setU(e.target.value);
-                if (errFields.u) setErrFields((f) => ({ ...f, u: false }));
-              }}
-              placeholder="Login"
-              autoFocus
-              aria-invalid={errFields.u}
-              className={`h-12 text-xl text-left px-[12px] py-[8px] placeholder:text-muted-foreground/60 transition-colors ${
-                errFields.u ? errCls : "opacity-75 border-double"
-              }`}
-            />
+
+        {/* Безопасность: предупреждение про автозаполнение */}
+        <div
+          role="alert"
+          className="mb-5 flex gap-2 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-900 dark:text-amber-200"
+        >
+          <ShieldAlert className="size-4 shrink-0 mt-0.5" />
+          <p>
+            <strong>Не включайте автоматическое запоминание логина и пароля</strong> в
+            браузере — для финансовой и личной безопасности клуба.
+          </p>
+        </div>
+
+        {search.expired === "1" && (
+          <div className="mb-4 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            Сеанс истёк после 12 часов неактивности. Войдите снова.
           </div>
-          <div>
-            <div className="relative">
+        )}
+
+        <div className="mb-4 grid grid-cols-2 rounded-md border border-border/60 p-1 text-sm">
+          <button
+            type="button"
+            onClick={() => setMode("signin")}
+            className={`rounded py-1.5 transition-colors ${
+              mode === "signin" ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+            }`}
+          >
+            Вход
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("signup")}
+            className={`rounded py-1.5 transition-colors ${
+              mode === "signup" ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+            }`}
+          >
+            Создать клуб
+          </button>
+        </div>
+
+        <form
+          onSubmit={submit}
+          className="space-y-3"
+          noValidate
+          autoComplete="off"
+          spellCheck={false}
+        >
+          {mode === "signup" && (
+            <>
               <Input
-                id="p"
-                type={showPwd ? "text" : "password"}
-                value={p}
-                onChange={(e) => {
-                  setP(e.target.value);
-                  if (errFields.p) setErrFields((f) => ({ ...f, p: false }));
-                }}
-                placeholder="Password"
-                aria-invalid={errFields.p}
-                className={`h-12 text-xl text-left px-[12px] py-[8px] pr-12 placeholder:text-muted-foreground/60 transition-colors ${
-                  errFields.p ? errCls : "opacity-75 border-double"
-                }`}
+                type="text"
+                placeholder="Ваше имя (владелец)"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                autoComplete="off"
+                className="h-11"
               />
-              <button
-                type="button"
-                onClick={() => setShowPwd((v) => !v)}
-                aria-label={showPwd ? "Скрыть пароль" : "Показать пароль"}
-                aria-pressed={showPwd}
-                className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {showPwd ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
-              </button>
-            </div>
+              <Input
+                type="text"
+                placeholder="Название клуба"
+                value={clubName}
+                onChange={(e) => setClubName(e.target.value)}
+                autoComplete="off"
+                className="h-11"
+              />
+            </>
+          )}
+          <Input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoFocus
+            autoComplete="off"
+            name="poker-email"
+            className="h-11"
+          />
+          <div className="relative">
+            <Input
+              type={showPwd ? "text" : "password"}
+              placeholder="Password"
+              value={pwd}
+              onChange={(e) => setPwd(e.target.value)}
+              autoComplete="new-password"
+              name="poker-password"
+              className="h-11 pr-12"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPwd((v) => !v)}
+              aria-label={showPwd ? "Скрыть пароль" : "Показать пароль"}
+              className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
+            >
+              {showPwd ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+            </button>
           </div>
+
           {err && (
             <div
               role="alert"
@@ -125,13 +189,15 @@ function LoginPage() {
               {err}
             </div>
           )}
-          <Button type="submit" className="w-full">Войти</Button>
+
+          <Button type="submit" className="w-full" disabled={busy}>
+            {busy ? "..." : mode === "signin" ? "Войти" : "Создать клуб и войти"}
+          </Button>
         </form>
-        <div className="mt-6 pt-6 border-t border-border/60 text-xs text-muted-foreground space-y-1">
-          <p className="font-medium text-foreground">Демо-доступы:</p>
-          <p>Админ: <span className="text-primary">admin / 123</span></p>
-          <p>Игрок: <span className="text-primary">player / 123</span></p>
-        </div>
+
+        <p className="mt-6 pt-4 border-t border-border/60 text-center text-xs text-muted-foreground">
+          Бесплатная DEMO-версия. В будущем появится подписка с оплатой криптой.
+        </p>
       </Card>
     </div>
   );
