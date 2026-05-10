@@ -21,6 +21,21 @@ export const Route = createFileRoute("/login")({
   },
 });
 
+function translateAuthError(msg: string): string {
+  const m = msg.toLowerCase();
+  if (m.includes("invalid login") || m.includes("invalid credentials"))
+    return "Неверный email или пароль";
+  if (m.includes("email not confirmed"))
+    return "Email не подтверждён. Проверьте почту.";
+  if (m.includes("user already registered") || m.includes("already been registered"))
+    return "Пользователь с таким email уже зарегистрирован";
+  if (m.includes("password") && m.includes("6"))
+    return "Пароль должен быть не короче 6 символов";
+  if (m.includes("failed to fetch") || m.includes("network"))
+    return "Нет связи с сервером. Проверьте интернет.";
+  return msg;
+}
+
 function LoginPage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
