@@ -39,10 +39,14 @@ function LoginPage() {
     setErr("");
     setBusy(true);
     try {
+      if (!email.trim() || !pwd) {
+        setErr("Введите email и пароль");
+        return;
+      }
       if (mode === "signin") {
         const r = await signIn(email.trim(), pwd);
         if (!r.ok) {
-          setErr(r.error);
+          setErr(translateAuthError(r.error));
           return;
         }
       } else {
@@ -57,7 +61,7 @@ function LoginPage() {
           clubName: clubName.trim(),
         });
         if (!r.ok) {
-          setErr(r.error);
+          setErr(translateAuthError(r.error));
           return;
         }
       }
@@ -67,6 +71,13 @@ function LoginPage() {
       } else {
         navigate({ to: "/games" });
       }
+    } catch (e) {
+      console.error("[login] submit error", e);
+      setErr(
+        e instanceof Error
+          ? `Ошибка соединения: ${e.message}`
+          : "Не удалось подключиться к серверу. Проверьте интернет и попробуйте ещё раз.",
+      );
     } finally {
       setBusy(false);
     }
