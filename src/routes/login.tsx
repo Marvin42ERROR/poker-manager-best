@@ -21,6 +21,21 @@ export const Route = createFileRoute("/login")({
   },
 });
 
+function translateAuthError(msg: string): string {
+  const m = msg.toLowerCase();
+  if (m.includes("invalid login") || m.includes("invalid credentials"))
+    return "Неверный email или пароль";
+  if (m.includes("email not confirmed"))
+    return "Email не подтверждён. Проверьте почту.";
+  if (m.includes("user already registered") || m.includes("already been registered"))
+    return "Пользователь с таким email уже зарегистрирован";
+  if (m.includes("password") && m.includes("6"))
+    return "Пароль должен быть не короче 6 символов";
+  if (m.includes("failed to fetch") || m.includes("network"))
+    return "Нет связи с сервером. Проверьте интернет.";
+  return msg;
+}
+
 function LoginPage() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
@@ -39,10 +54,14 @@ function LoginPage() {
     setErr("");
     setBusy(true);
     try {
+      if (!email.trim() || !pwd) {
+        setErr("Введите email и пароль");
+        return;
+      }
       if (mode === "signin") {
         const r = await signIn(email.trim(), pwd);
         if (!r.ok) {
-          setErr(r.error);
+          setErr(translateAuthError(r.error));
           return;
         }
       } else {
@@ -57,7 +76,7 @@ function LoginPage() {
           clubName: clubName.trim(),
         });
         if (!r.ok) {
-          setErr(r.error);
+          setErr(translateAuthError(r.error));
           return;
         }
       }
@@ -67,6 +86,13 @@ function LoginPage() {
       } else {
         navigate({ to: "/games" });
       }
+    } catch (e) {
+      console.error("[login] submit error", e);
+      setErr(
+        e instanceof Error
+          ? `Ошибка соединения: ${e.message}`
+          : "Не удалось подключиться к серверу. Проверьте интернет и попробуйте ещё раз.",
+      );
     } finally {
       setBusy(false);
     }
