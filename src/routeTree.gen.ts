@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SelectClubRouteImport } from './routes/select-club'
 import { Route as PlayersRouteImport } from './routes/players'
+import { Route as NoAccessRouteImport } from './routes/no-access'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as ExpensesRouteImport } from './routes/expenses'
@@ -25,6 +26,11 @@ const SelectClubRoute = SelectClubRouteImport.update({
 const PlayersRoute = PlayersRouteImport.update({
   id: '/players',
   path: '/players',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NoAccessRoute = NoAccessRouteImport.update({
+  id: '/no-access',
+  path: '/no-access',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/expenses': typeof ExpensesRoute
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
+  '/no-access': typeof NoAccessRoute
   '/players': typeof PlayersRoute
   '/select-club': typeof SelectClubRoute
 }
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/expenses': typeof ExpensesRoute
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
+  '/no-access': typeof NoAccessRoute
   '/players': typeof PlayersRoute
   '/select-club': typeof SelectClubRoute
 }
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/expenses': typeof ExpensesRoute
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
+  '/no-access': typeof NoAccessRoute
   '/players': typeof PlayersRoute
   '/select-club': typeof SelectClubRoute
 }
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/expenses'
     | '/games'
     | '/login'
+    | '/no-access'
     | '/players'
     | '/select-club'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/expenses'
     | '/games'
     | '/login'
+    | '/no-access'
     | '/players'
     | '/select-club'
   id:
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/expenses'
     | '/games'
     | '/login'
+    | '/no-access'
     | '/players'
     | '/select-club'
   fileRoutesById: FileRoutesById
@@ -117,6 +129,7 @@ export interface RootRouteChildren {
   ExpensesRoute: typeof ExpensesRoute
   GamesRoute: typeof GamesRoute
   LoginRoute: typeof LoginRoute
+  NoAccessRoute: typeof NoAccessRoute
   PlayersRoute: typeof PlayersRoute
   SelectClubRoute: typeof SelectClubRoute
 }
@@ -135,6 +148,13 @@ declare module '@tanstack/react-router' {
       path: '/players'
       fullPath: '/players'
       preLoaderRoute: typeof PlayersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/no-access': {
+      id: '/no-access'
+      path: '/no-access'
+      fullPath: '/no-access'
+      preLoaderRoute: typeof NoAccessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -181,19 +201,10 @@ const rootRouteChildren: RootRouteChildren = {
   ExpensesRoute: ExpensesRoute,
   GamesRoute: GamesRoute,
   LoginRoute: LoginRoute,
+  NoAccessRoute: NoAccessRoute,
   PlayersRoute: PlayersRoute,
   SelectClubRoute: SelectClubRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
