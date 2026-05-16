@@ -1,8 +1,10 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { useAuth, useStore, getAuth } from "@/lib/auth";
+import { useAuthState, useStore } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth-guards";
 import { store } from "@/lib/poker-store";
 import { AppShell, AccessDenied } from "@/components/AppShell";
+import { AuthLoading } from "@/components/AuthLoading";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,12 +14,7 @@ import { User } from "lucide-react";
 
 export const Route = createFileRoute("/players")({
   component: PlayersPage,
-  beforeLoad: () => {
-    if (typeof window === "undefined") return;
-    const a = getAuth();
-    if (!a) throw redirect({ to: "/login" });
-    if (a.role !== "admin") throw redirect({ to: "/no-access" });
-  },
+  beforeLoad: requireAdmin,
 });
 
 function fmt(n?: number) {
@@ -26,10 +23,11 @@ function fmt(n?: number) {
 }
 
 function PlayersPage() {
-  const auth = useAuth();
+  const { auth, initializing } = useAuthState();
   const data = useStore();
   const [selected, setSelected] = useState<string | null>(data.players[0]?.id || null);
 
+  if (initializing && !auth) return <AuthLoading />;
   if (!auth) return null;
   if (auth.role !== "admin") return <AppShell><AccessDenied /></AppShell>;
 
