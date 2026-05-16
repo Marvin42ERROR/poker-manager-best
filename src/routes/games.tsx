@@ -24,10 +24,11 @@ function fmtMoney(n?: number) {
 }
 
 function GamesPage() {
-  const auth = useAuth();
+  const { auth, initializing } = useAuthState();
   const data = useStore();
   const [editing, setEditing] = useState<Session | null>(null);
 
+  if (initializing && !auth) return <AuthLoading />;
   if (!auth) return null;
 
   const today = new Date().toISOString().slice(0, 10);
