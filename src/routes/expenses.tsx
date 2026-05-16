@@ -1,8 +1,10 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { useAuth, useStore, getAuth } from "@/lib/auth";
+import { useAuthState, useStore } from "@/lib/auth";
+import { requireAdmin } from "@/lib/auth-guards";
 import { store, type Expense } from "@/lib/poker-store";
 import { AppShell, AccessDenied } from "@/components/AppShell";
+import { AuthLoading } from "@/components/AuthLoading";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,24 +16,20 @@ import { Trash2, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/expenses")({
   component: ExpensesPage,
-  beforeLoad: () => {
-    if (typeof window === "undefined") return;
-    const a = getAuth();
-    if (!a) throw redirect({ to: "/login" });
-    if (a.role !== "admin") throw redirect({ to: "/no-access" });
-  },
+  beforeLoad: requireAdmin,
 });
 
 const CATEGORIES: Expense["category"][] = ["Напитки", "Еда", "Бонусы", "Долги гостей", "Прочее"];
 
 function ExpensesPage() {
-  const auth = useAuth();
+  const { auth, initializing } = useAuthState();
   const data = useStore();
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [category, setCategory] = useState<Expense["category"]>("Напитки");
   const [amount, setAmount] = useState("");
   const [comment, setComment] = useState("");
 
+  if (initializing && !auth) return <AuthLoading />;
   if (!auth) return null;
   if (auth.role !== "admin") return <AppShell><AccessDenied /></AppShell>;
 
