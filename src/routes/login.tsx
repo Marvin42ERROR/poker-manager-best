@@ -1,6 +1,7 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { signIn, signUp, getAuth } from "@/lib/auth";
+import { redirectIfAuthed } from "@/lib/auth-guards";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -14,11 +15,7 @@ export const Route = createFileRoute("/login")({
   validateSearch: (s: Record<string, unknown>): SearchParams => ({
     expired: typeof s.expired === "string" ? s.expired : undefined,
   }),
-  beforeLoad: () => {
-    if (typeof window !== "undefined" && getAuth()) {
-      throw redirect({ to: "/games" });
-    }
-  },
+  beforeLoad: redirectIfAuthed,
 });
 
 function translateAuthError(msg: string): string {

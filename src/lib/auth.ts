@@ -32,6 +32,7 @@ const LAST_ACTIVITY_KEY = "poker-last-activity-v2";
 const IDLE_LIMIT_MS = 12 * 60 * 60 * 1000; // 12 hours
 
 let cached: Auth | null = null;
+let initializing = true;
 const listeners = new Set<() => void>();
 
 function notify() {
@@ -66,6 +67,10 @@ export function getAuth(): Auth | null {
   return cached;
 }
 
+export function isAuthInitializing(): boolean {
+  return initializing;
+}
+
 export function getActiveClubId(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem(ACTIVE_CLUB_KEY);
@@ -89,7 +94,6 @@ async function buildAuth(userId: string): Promise<Auth | null> {
 
   const isCreator = roles.some((r) => r.role === "creator");
 
-  // collect club memberships
   const clubIds = roles.map((r) => r.club_id).filter((id): id is string => !!id);
   let allClubs: { id: string; name: string }[] = [];
   if (isCreator) {
@@ -133,18 +137,32 @@ async function buildAuth(userId: string): Promise<Auth | null> {
 }
 
 async function refreshAuthFromSession() {
-  const { data } = await supabase.auth.getSession();
-  const userId = data.session?.user.id;
-  if (!userId) {
-    cached = null;
-    writeSnapshot(null);
+  try {
+    const { data } = await supabase.auth.getSession();
+    const userId = data.session?.user.id;
+    if (!userId) {
+      const had = cached !== null;
+      cached = null;
+      writeSnapshot(null);
+      if (had && typeof window !== "undefined") {
+        // Session expired/cleared elsewhere — kick user to login
+        const path = window.location.pathname;
+        if (path !== "/login" && path !== "/" && path !== "/no-access") {
+          window.location.replace("/login?expired=1");
+          return;
+        }
+      }
+      return;
+    }
+    const next = await buildAuth(userId);
+    cached = next;
+    writeSnapshot(next);
+  } catch (e) {
+    console.error("[auth] refresh failed", e);
+  } finally {
+    initializing = false;
     notify();
-    return;
   }
-  const next = await buildAuth(userId);
-  cached = next;
-  writeSnapshot(next);
-  notify();
 }
 
 export async function signUp(opts: {
@@ -182,14 +200,33 @@ export async function signIn(
   return { ok: true };
 }
 
-export async function logout() {
-  await supabase.auth.signOut();
-  cached = null;
-  writeSnapshot(null);
-  if (typeof window !== "undefined") {
+function clearLocalAuthStorage() {
+  if (typeof window === "undefined") return;
+  try {
+    // Clear known keys
+    localStorage.removeItem(SNAPSHOT_KEY);
     localStorage.removeItem(ACTIVE_CLUB_KEY);
     localStorage.removeItem(LAST_ACTIVITY_KEY);
+    // Sweep any leftover poker-* keys to guarantee a clean session
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith("poker-") && k !== "poker-data-v1") {
+        localStorage.removeItem(k);
+      }
+    }
+  } catch (e) {
+    console.warn("[auth] failed to clear local storage", e);
   }
+}
+
+export async function logout() {
+  try {
+    await supabase.auth.signOut();
+  } catch (e) {
+    console.warn("[auth] signOut error", e);
+  }
+  cached = null;
+  clearLocalAuthStorage();
   notify();
 }
 
@@ -212,15 +249,20 @@ function checkIdle() {
 }
 
 if (typeof window !== "undefined") {
-  // session listener
-  supabase.auth.onAuthStateChange((_event, session) => {
-    if (session?.user) {
-      void refreshAuthFromSession();
-    } else {
+  // session listener — fires on sign-in, sign-out, token refresh, in-tab and cross-tab
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event === "SIGNED_OUT" || !session?.user) {
+      const had = cached !== null;
       cached = null;
-      writeSnapshot(null);
+      clearLocalAuthStorage();
+      initializing = false;
       notify();
+      if (had && location.pathname !== "/login") {
+        window.location.replace("/login");
+      }
+      return;
     }
+    void refreshAuthFromSession();
   });
   // initial bootstrap
   void refreshAuthFromSession();
@@ -245,6 +287,19 @@ export function useAuth(): Auth | null {
     };
   }, []);
   return a;
+}
+
+export function useAuthState(): { auth: Auth | null; initializing: boolean } {
+  const [state, setState] = useState({ auth: cached, initializing });
+  useEffect(() => {
+    const l = () => setState({ auth: cached, initializing });
+    listeners.add(l);
+    l();
+    return () => {
+      listeners.delete(l);
+    };
+  }, []);
+  return state;
 }
 
 // existing data store hook untouched
