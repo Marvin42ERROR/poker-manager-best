@@ -1,9 +1,10 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { useAuth, useStore } from "@/lib/auth";
-import { getAuth } from "@/lib/auth";
+import { useAuthState, useStore } from "@/lib/auth";
+import { requireAuth } from "@/lib/auth-guards";
 import { store, type Session } from "@/lib/poker-store";
 import { AppShell } from "@/components/AppShell";
+import { AuthLoading } from "@/components/AuthLoading";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,11 +15,7 @@ import { Pencil, Users, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/games")({
   component: GamesPage,
-  beforeLoad: () => {
-    if (typeof window !== "undefined" && !getAuth()) {
-      throw redirect({ to: "/login" });
-    }
-  },
+  beforeLoad: requireAuth,
 });
 
 function fmtMoney(n?: number) {
