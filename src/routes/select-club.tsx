@@ -1,17 +1,13 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useAuth, setActiveClub, getAuth, logout } from "@/lib/auth";
+import { createFileRoute } from "@tanstack/react-router";
+import { useAuth, setActiveClub, logout } from "@/lib/auth";
+import { requireCreator } from "@/lib/auth-guards";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Spade, LogOut } from "lucide-react";
 
 export const Route = createFileRoute("/select-club")({
   component: SelectClubPage,
-  beforeLoad: () => {
-    if (typeof window === "undefined") return;
-    const a = getAuth();
-    if (!a) throw redirect({ to: "/login" });
-    if (!a.isCreator) throw redirect({ to: "/games" });
-  },
+  beforeLoad: requireCreator,
 });
 
 function SelectClubPage() {
