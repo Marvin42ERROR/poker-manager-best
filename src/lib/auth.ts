@@ -108,7 +108,6 @@ async function startSupportSession(clubId: string) {
   try {
     const { data, error } = await supabase.rpc("start_support_session", {
       _club_id: clubId,
-      _reason: null,
     });
     if (error) {
       console.warn("[auth] start_support_session failed", error);
