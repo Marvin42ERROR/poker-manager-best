@@ -78,10 +78,10 @@ function LoginPage() {
         }
       }
       const a = getAuth();
-      if (a?.isCreator && !a.activeClubId) {
-        navigate({ to: "/select-club" });
+      if (a) {
+        navigate({ to: startRouteFor(a) });
       } else {
-        navigate({ to: "/games" });
+        navigate({ to: "/login" });
       }
     } catch (e) {
       console.error("[login] submit error", e);
