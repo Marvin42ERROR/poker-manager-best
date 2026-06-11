@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { signIn, signUp, getAuth } from "@/lib/auth";
-import { redirectIfAuthed } from "@/lib/auth-guards";
+import { redirectIfAuthed, startRouteFor } from "@/lib/auth-guards";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -78,10 +78,10 @@ function LoginPage() {
         }
       }
       const a = getAuth();
-      if (a?.isCreator && !a.activeClubId) {
-        navigate({ to: "/select-club" });
+      if (a) {
+        navigate({ to: startRouteFor(a) });
       } else {
-        navigate({ to: "/games" });
+        navigate({ to: "/login" });
       }
     } catch (e) {
       console.error("[login] submit error", e);
