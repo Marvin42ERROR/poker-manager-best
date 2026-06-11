@@ -1,5 +1,5 @@
 import { Link, useRouter, useLocation } from "@tanstack/react-router";
-import { useAuth, logout, setActiveClub } from "@/lib/auth";
+import { useAuth, logout, setActiveClub, type AppRole } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, Spade, ChevronDown, Crown } from "lucide-react";
+import { LogOut, Spade, ChevronDown, Crown, LifeBuoy } from "lucide-react";
 
 type LegacyRole = "admin" | "player";
 const NAV: { to: "/games" | "/players" | "/expenses" | "/cash"; label: string; roles: LegacyRole[] }[] = [
@@ -19,10 +19,10 @@ const NAV: { to: "/games" | "/players" | "/expenses" | "/cash"; label: string; r
   { to: "/cash", label: "Итоговый кэш", roles: ["admin"] },
 ];
 
-const ROLE_LABEL: Record<string, string> = {
+const ROLE_LABEL: Record<AppRole, string> = {
   creator: "Создатель",
   owner: "Владелец",
-  pitboss: "Пит-босс",
+  manager: "Менеджер",
   dealer: "Дилер",
   player: "Игрок",
 };
@@ -43,13 +43,39 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const switchClub = (id: string) => {
-    setActiveClub(id);
+  const switchClub = async (id: string) => {
+    if (id === auth.activeClubId) return;
+    await setActiveClub(id);
     router.navigate({ to: "/games" });
   };
 
+  const goSelectClub = () => router.navigate({ to: "/select-club" });
+
+  const showSwitcher = auth.isCreator || auth.clubs.length > 1;
+  const headerRoleLabel = auth.supportMode
+    ? "Support (Owner-доступ)"
+    : ROLE_LABEL[auth.appRole];
+
   return (
     <div className="min-h-screen flex flex-col">
+      {auth.supportMode && (
+        <div className="bg-amber-500/15 border-b border-amber-500/40 text-amber-900 dark:text-amber-200">
+          <div className="max-w-7xl mx-auto px-6 py-2 flex items-center gap-2 text-xs">
+            <LifeBuoy className="size-4 shrink-0" />
+            <span>
+              <strong>Support Mode.</strong> Вы вошли как Создатель в клуб
+              «{auth.activeClubName}» с временным доступом уровня Owner. Действия
+              отображаются в журнале как «System Support».
+            </span>
+            <button
+              onClick={goSelectClub}
+              className="ml-auto underline underline-offset-2 hover:no-underline"
+            >
+              Сменить клуб
+            </button>
+          </div>
+        </div>
+      )}
       <header className="border-b border-border/60 backdrop-blur bg-background/80 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-6 flex-wrap">
           <Link to="/games" className="flex items-center gap-2 font-bold text-lg">
@@ -62,30 +88,52 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-2">
-                  {auth.isCreator && <Crown className="size-3.5 text-amber-500" />}
-                  <span className="max-w-[180px] truncate">
+                  {auth.supportMode ? (
+                    <LifeBuoy className="size-3.5 text-amber-500" />
+                  ) : auth.isCreator ? (
+                    <Crown className="size-3.5 text-amber-500" />
+                  ) : null}
+                  <span className="max-w-[220px] truncate">
                     {auth.activeClubName ?? "Выбрать клуб"}
+                    {!auth.supportMode && auth.activeClubId && (
+                      <span className="ml-1 text-muted-foreground">
+                        ({ROLE_LABEL[auth.appRole]})
+                      </span>
+                    )}
                   </span>
-                  {(auth.isCreator || auth.clubs.length > 1) && (
-                    <ChevronDown className="size-3.5 opacity-60" />
-                  )}
+                  {showSwitcher && <ChevronDown className="size-3.5 opacity-60" />}
                 </Button>
               </DropdownMenuTrigger>
-              {(auth.isCreator || auth.clubs.length > 1) && (
-                <DropdownMenuContent align="start" className="w-64">
+              {showSwitcher && (
+                <DropdownMenuContent align="start" className="w-72">
                   <DropdownMenuLabel>
                     {auth.isCreator ? "Все клубы (Создатель)" : "Ваши клубы"}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  {auth.clubs.map((c) => (
-                    <DropdownMenuItem
-                      key={c.id}
-                      onClick={() => switchClub(c.id)}
-                      className={c.id === auth.activeClubId ? "bg-accent" : ""}
-                    >
-                      <span className="truncate">{c.name}</span>
-                    </DropdownMenuItem>
-                  ))}
+                  {auth.clubs.map((c) => {
+                    const isActive = c.id === auth.activeClubId;
+                    const roleText = auth.isCreator
+                      ? "Support"
+                      : ROLE_LABEL[c.role];
+                    return (
+                      <DropdownMenuItem
+                        key={c.id}
+                        onClick={() => switchClub(c.id)}
+                        className={isActive ? "bg-accent" : ""}
+                      >
+                        <div className="flex w-full items-center justify-between gap-3 min-w-0">
+                          <span className="truncate">{c.name}</span>
+                          <span className="text-xs text-muted-foreground shrink-0">
+                            {roleText}
+                          </span>
+                        </div>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={goSelectClub}>
+                    Все клубы…
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               )}
             </DropdownMenu>
@@ -113,7 +161,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="ml-auto flex items-center gap-3">
             <div className="text-right">
               <div className="text-sm font-medium">{auth.name}</div>
-              <div className="text-xs text-muted-foreground">{ROLE_LABEL[auth.appRole]}</div>
+              <div className="text-xs text-muted-foreground">{headerRoleLabel}</div>
             </div>
             <Button variant="outline" size="sm" onClick={handleLogout} className="gap-2">
               <LogOut className="size-4" />
