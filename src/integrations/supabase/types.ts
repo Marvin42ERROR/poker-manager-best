@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          club_id: string | null
+          created_at: string
+          details: Json
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          via_support_session_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          club_id?: string | null
+          created_at?: string
+          details?: Json
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          via_support_session_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          club_id?: string | null
+          created_at?: string
+          details?: Json
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          via_support_session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_log_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_log_via_support_session_id_fkey"
+            columns: ["via_support_session_id"]
+            isOneToOne: false
+            referencedRelation: "support_mode_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clubs: {
         Row: {
           created_at: string
@@ -53,6 +104,41 @@ export type Database = {
         }
         Relationships: []
       }
+      support_mode_sessions: {
+        Row: {
+          club_id: string
+          ended_at: string | null
+          id: string
+          reason: string | null
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          club_id: string
+          ended_at?: string | null
+          id?: string
+          reason?: string | null
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          club_id?: string
+          ended_at?: string | null
+          id?: string
+          reason?: string | null
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_mode_sessions_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           club_id: string | null
@@ -90,12 +176,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      end_support_session: { Args: { _session_id: string }; Returns: undefined }
       get_user_clubs: {
         Args: { _user_id: string }
         Returns: {
           club_id: string
           role: Database["public"]["Enums"]["app_role"]
         }[]
+      }
+      has_active_support_session: {
+        Args: { _club_id: string; _user_id: string }
+        Returns: boolean
       }
       has_club_role: {
         Args: {
@@ -110,9 +201,23 @@ export type Database = {
         Args: { _club_id: string; _user_id: string }
         Returns: boolean
       }
+      log_action: {
+        Args: {
+          _action: string
+          _club_id: string
+          _details?: Json
+          _entity_id?: string
+          _entity_type?: string
+        }
+        Returns: string
+      }
+      start_support_session: {
+        Args: { _club_id: string; _reason?: string }
+        Returns: string
+      }
     }
     Enums: {
-      app_role: "creator" | "owner" | "pitboss" | "dealer" | "player"
+      app_role: "creator" | "owner" | "manager" | "dealer" | "player"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -240,7 +345,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["creator", "owner", "pitboss", "dealer", "player"],
+      app_role: ["creator", "owner", "manager", "dealer", "player"],
     },
   },
 } as const
