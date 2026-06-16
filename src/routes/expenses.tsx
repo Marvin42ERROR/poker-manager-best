@@ -15,6 +15,7 @@ import {
 import { Trash2, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/expenses")({
+  ssr: false,
   component: ExpensesPage,
   beforeLoad: requireAdmin,
 });
