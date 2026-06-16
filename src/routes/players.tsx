@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { User } from "lucide-react";
 
 export const Route = createFileRoute("/players")({
+  ssr: false,
   component: PlayersPage,
   beforeLoad: requireAdmin,
 });
