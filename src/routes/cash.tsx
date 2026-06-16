@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { TrendingUp, Clock, Wallet, Receipt } from "lucide-react";
 
 export const Route = createFileRoute("/cash")({
+  ssr: false,
   component: CashPage,
   beforeLoad: requireAdmin,
 });
