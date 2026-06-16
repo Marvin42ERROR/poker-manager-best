@@ -15,6 +15,7 @@ const ROLE_LABEL: Record<AppRole, string> = {
 };
 
 export const Route = createFileRoute("/select-club")({
+  ssr: false,
   component: SelectClubPage,
   beforeLoad: () => {
     if (typeof window === "undefined") return;
