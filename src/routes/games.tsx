@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Pencil, Users, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/games")({
+  ssr: false,
   component: GamesPage,
   beforeLoad: requireAuth,
 });
