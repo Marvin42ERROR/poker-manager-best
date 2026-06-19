@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SelectClubRouteImport } from './routes/select-club'
 import { Route as PlayersRouteImport } from './routes/players'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as NoAccessRouteImport } from './routes/no-access'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as GamesRouteImport } from './routes/games'
@@ -26,6 +27,11 @@ const SelectClubRoute = SelectClubRouteImport.update({
 const PlayersRoute = PlayersRouteImport.update({
   id: '/players',
   path: '/players',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NoAccessRoute = NoAccessRouteImport.update({
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
+  '/notifications': typeof NotificationsRoute
   '/players': typeof PlayersRoute
   '/select-club': typeof SelectClubRoute
 }
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
+  '/notifications': typeof NotificationsRoute
   '/players': typeof PlayersRoute
   '/select-club': typeof SelectClubRoute
 }
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
   '/no-access': typeof NoAccessRoute
+  '/notifications': typeof NotificationsRoute
   '/players': typeof PlayersRoute
   '/select-club': typeof SelectClubRoute
 }
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/games'
     | '/login'
     | '/no-access'
+    | '/notifications'
     | '/players'
     | '/select-club'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/games'
     | '/login'
     | '/no-access'
+    | '/notifications'
     | '/players'
     | '/select-club'
   id:
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/games'
     | '/login'
     | '/no-access'
+    | '/notifications'
     | '/players'
     | '/select-club'
   fileRoutesById: FileRoutesById
@@ -130,6 +142,7 @@ export interface RootRouteChildren {
   GamesRoute: typeof GamesRoute
   LoginRoute: typeof LoginRoute
   NoAccessRoute: typeof NoAccessRoute
+  NotificationsRoute: typeof NotificationsRoute
   PlayersRoute: typeof PlayersRoute
   SelectClubRoute: typeof SelectClubRoute
 }
@@ -148,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/players'
       fullPath: '/players'
       preLoaderRoute: typeof PlayersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/no-access': {
@@ -202,6 +222,7 @@ const rootRouteChildren: RootRouteChildren = {
   GamesRoute: GamesRoute,
   LoginRoute: LoginRoute,
   NoAccessRoute: NoAccessRoute,
+  NotificationsRoute: NotificationsRoute,
   PlayersRoute: PlayersRoute,
   SelectClubRoute: SelectClubRoute,
 }
