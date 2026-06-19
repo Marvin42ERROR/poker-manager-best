@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { store, subscribe } from "./poker-store";
 
-export type AppRole = "creator" | "owner" | "manager" | "dealer" | "player";
+export type AppRole = "creator" | "owner" | "co_owner" | "manager" | "dealer" | "player";
 // Legacy "admin" | "player" preserved for existing screens.
 export type Role = "admin" | "player";
 
