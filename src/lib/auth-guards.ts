@@ -7,15 +7,16 @@ import { getAuth, type Auth } from "./auth";
  */
 
 /** Where this user should land after login / when blocked from a forbidden page. */
-export function startRouteFor(a: Auth): "/select-club" | "/games" | "/no-access" {
+export function startRouteFor(a: Auth): "/select-club" | "/games" {
   // Creator must always pick a club to enter (Support Mode).
   if (a.isCreator && !a.activeClubId) return "/select-club";
+  // Users with no clubs land on /select-club so they can request access.
+  if (!a.isCreator && a.clubs.length === 0) return "/select-club";
   // Regular users with multiple memberships choose which club to enter.
   if (!a.isCreator && !a.activeClubId && a.clubs.length > 1) return "/select-club";
-  // No clubs at all — nothing to enter.
-  if (!a.isCreator && a.clubs.length === 0) return "/no-access";
   return "/games";
 }
+
 
 export function requireAuth() {
   if (typeof window === "undefined") return;

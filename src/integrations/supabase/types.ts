@@ -65,6 +65,38 @@ export type Database = {
           },
         ]
       }
+      club_settings: {
+        Row: {
+          club_id: string
+          created_at: string
+          invite_code: string
+          is_public: boolean
+          updated_at: string
+        }
+        Insert: {
+          club_id: string
+          created_at?: string
+          invite_code: string
+          is_public?: boolean
+          updated_at?: string
+        }
+        Update: {
+          club_id?: string
+          created_at?: string
+          invite_code?: string
+          is_public?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_settings_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: true
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clubs: {
         Row: {
           created_at: string
@@ -85,6 +117,53 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      membership_requests: {
+        Row: {
+          assigned_role: Database["public"]["Enums"]["app_role"] | null
+          club_id: string
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          message: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_role?: Database["public"]["Enums"]["app_role"] | null
+          club_id: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          message?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_role?: Database["public"]["Enums"]["app_role"] | null
+          club_id?: string
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          message?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "membership_requests_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -176,7 +255,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_membership_request: {
+        Args: {
+          _request_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: undefined
+      }
+      cancel_membership_request: {
+        Args: { _request_id: string }
+        Returns: undefined
+      }
+      count_pending_requests_for_me: { Args: never; Returns: number }
       end_support_session: { Args: { _session_id: string }; Returns: undefined }
+      find_club_by_invite: {
+        Args: { _code: string }
+        Returns: {
+          id: string
+          is_public: boolean
+          name: string
+        }[]
+      }
+      gen_invite_code: { Args: never; Returns: string }
       get_user_clubs: {
         Args: { _user_id: string }
         Returns: {
@@ -201,6 +301,18 @@ export type Database = {
         Args: { _club_id: string; _user_id: string }
         Returns: boolean
       }
+      list_pending_requests_for_me: {
+        Args: never
+        Returns: {
+          club_id: string
+          club_name: string
+          created_at: string
+          display_name: string
+          id: string
+          message: string
+          user_id: string
+        }[]
+      }
       log_action: {
         Args: {
           _action: string
@@ -211,13 +323,34 @@ export type Database = {
         }
         Returns: string
       }
+      reject_membership_request: {
+        Args: { _request_id: string }
+        Returns: undefined
+      }
+      request_club_access: {
+        Args: { _club_id: string; _invite_code?: string; _message?: string }
+        Returns: string
+      }
+      search_public_clubs: {
+        Args: { _q: string }
+        Returns: {
+          id: string
+          name: string
+        }[]
+      }
       start_support_session: {
         Args: { _club_id: string; _reason?: string }
         Returns: string
       }
     }
     Enums: {
-      app_role: "creator" | "owner" | "manager" | "dealer" | "player"
+      app_role:
+        | "creator"
+        | "owner"
+        | "co_owner"
+        | "manager"
+        | "dealer"
+        | "player"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -345,7 +478,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["creator", "owner", "manager", "dealer", "player"],
+      app_role: ["creator", "owner", "co_owner", "manager", "dealer", "player"],
     },
   },
 } as const

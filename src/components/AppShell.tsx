@@ -10,6 +10,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LogOut, Spade, ChevronDown, Crown, LifeBuoy } from "lucide-react";
+import { NotificationsBell } from "@/components/NotificationsBell";
+import { canManageActiveClub } from "@/lib/membership";
+
 
 type LegacyRole = "admin" | "player";
 const NAV: { to: "/games" | "/players" | "/expenses" | "/cash"; label: string; roles: LegacyRole[] }[] = [
@@ -22,10 +25,12 @@ const NAV: { to: "/games" | "/players" | "/expenses" | "/cash"; label: string; r
 const ROLE_LABEL: Record<AppRole, string> = {
   creator: "Создатель",
   owner: "Владелец",
+  co_owner: "Со-владелец",
   manager: "Менеджер",
   dealer: "Дилер",
   player: "Игрок",
 };
+
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
@@ -159,6 +164,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </nav>
 
           <div className="ml-auto flex items-center gap-3">
+            <NotificationsBell
+              canManage={canManageActiveClub({
+                isCreator: auth.isCreator,
+                appRole: auth.appRole,
+              })}
+            />
             <div className="text-right">
               <div className="text-sm font-medium">{auth.name}</div>
               <div className="text-xs text-muted-foreground">{headerRoleLabel}</div>
@@ -168,6 +179,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               Выйти
             </Button>
           </div>
+
         </div>
       </header>
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">{children}</main>
