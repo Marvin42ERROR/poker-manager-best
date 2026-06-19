@@ -39,9 +39,10 @@ export async function requestClubAccess(opts: {
 }): Promise<string> {
   const { data, error } = await supabase.rpc("request_club_access", {
     _club_id: opts.clubId,
-    _invite_code: opts.inviteCode ?? null,
-    _message: opts.message ?? null,
+    _invite_code: opts.inviteCode ?? undefined,
+    _message: opts.message ?? undefined,
   });
+
   if (error) throw error;
   return data as string;
 }
