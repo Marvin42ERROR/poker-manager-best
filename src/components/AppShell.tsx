@@ -164,6 +164,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </nav>
 
           <div className="ml-auto flex items-center gap-3">
+            <NotificationsBell
+              canManage={canManageActiveClub({
+                isCreator: auth.isCreator,
+                appRole: auth.appRole,
+              })}
+            />
             <div className="text-right">
               <div className="text-sm font-medium">{auth.name}</div>
               <div className="text-xs text-muted-foreground">{headerRoleLabel}</div>
@@ -173,6 +179,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               Выйти
             </Button>
           </div>
+
         </div>
       </header>
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">{children}</main>
