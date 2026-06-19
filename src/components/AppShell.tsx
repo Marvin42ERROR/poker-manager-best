@@ -10,6 +10,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LogOut, Spade, ChevronDown, Crown, LifeBuoy } from "lucide-react";
+import { NotificationsBell } from "@/components/NotificationsBell";
+import { canManageActiveClub } from "@/lib/membership";
+
 
 type LegacyRole = "admin" | "player";
 const NAV: { to: "/games" | "/players" | "/expenses" | "/cash"; label: string; roles: LegacyRole[] }[] = [
