@@ -44,8 +44,9 @@ function notify() {
 }
 
 function legacyRoleFor(role: AppRole): Role {
-  return role === "creator" || role === "owner" || role === "manager" ? "admin" : "player";
+  return role === "creator" || role === "owner" || role === "co_owner" || role === "manager" ? "admin" : "player";
 }
+
 
 function readSnapshot(): Auth | null {
   if (typeof window === "undefined") return null;
