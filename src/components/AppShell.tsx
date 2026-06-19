@@ -22,10 +22,12 @@ const NAV: { to: "/games" | "/players" | "/expenses" | "/cash"; label: string; r
 const ROLE_LABEL: Record<AppRole, string> = {
   creator: "Создатель",
   owner: "Владелец",
+  co_owner: "Со-владелец",
   manager: "Менеджер",
   dealer: "Дилер",
   player: "Игрок",
 };
+
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
