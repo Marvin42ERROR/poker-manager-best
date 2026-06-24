@@ -170,7 +170,7 @@ async function buildAuth(userId: string): Promise<Auth | null> {
   }
 
   const clubs: ClubInfo[] = allClubs.map((c) => {
-    const r = roles.find((x) => x.club_id === c.id)?.role as AppRole | undefined;
+    const r = safeRoles.find((x) => x.club_id === c.id)?.role as AppRole | undefined;
     // Creators are not members; they are shown as Owner-equivalent ("Support") in their club list.
     return { id: c.id, name: c.name, role: r ?? "owner" };
   });
