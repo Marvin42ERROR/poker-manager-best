@@ -155,7 +155,7 @@ async function buildAuth(userId: string): Promise<Auth | null> {
 
   // Creators see every club in the system; regular users see only the clubs
   // they are members of (via user_roles.club_id).
-  const memberClubIds = roles.map((r) => r.club_id).filter((id): id is string => !!id);
+  const memberClubIds = safeRoles.map((r) => r.club_id).filter((id): id is string => !!id);
   let allClubs: { id: string; name: string }[] = [];
   if (isCreator) {
     const { data } = await supabase.from("clubs").select("id,name").order("name");
