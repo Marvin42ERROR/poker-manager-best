@@ -189,7 +189,7 @@ async function buildAuth(userId: string): Promise<Auth | null> {
   const supportMode = isCreator && !!activeClub;
   const appRole: AppRole = supportMode
     ? "owner"
-    : (activeClub?.role ?? (isCreator ? "creator" : (roles[0].role as AppRole)));
+    : (activeClub?.role ?? (isCreator ? "creator" : ((safeRoles[0]?.role as AppRole) ?? "player")));
 
   return {
     userId,
