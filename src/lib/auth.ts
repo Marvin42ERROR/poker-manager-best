@@ -150,9 +150,8 @@ async function buildAuth(userId: string): Promise<Auth | null> {
     supabase.from("user_roles").select("role,club_id").eq("user_id", userId),
   ]);
 
-  if (!roles || roles.length === 0) return null;
-
-  const isCreator = roles.some((r) => r.role === "creator");
+  const safeRoles = roles ?? [];
+  const isCreator = safeRoles.some((r) => r.role === "creator");
 
   // Creators see every club in the system; regular users see only the clubs
   // they are members of (via user_roles.club_id).
