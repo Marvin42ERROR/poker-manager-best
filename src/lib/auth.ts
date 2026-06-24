@@ -150,13 +150,12 @@ async function buildAuth(userId: string): Promise<Auth | null> {
     supabase.from("user_roles").select("role,club_id").eq("user_id", userId),
   ]);
 
-  if (!roles || roles.length === 0) return null;
-
-  const isCreator = roles.some((r) => r.role === "creator");
+  const safeRoles = roles ?? [];
+  const isCreator = safeRoles.some((r) => r.role === "creator");
 
   // Creators see every club in the system; regular users see only the clubs
   // they are members of (via user_roles.club_id).
-  const memberClubIds = roles.map((r) => r.club_id).filter((id): id is string => !!id);
+  const memberClubIds = safeRoles.map((r) => r.club_id).filter((id): id is string => !!id);
   let allClubs: { id: string; name: string }[] = [];
   if (isCreator) {
     const { data } = await supabase.from("clubs").select("id,name").order("name");
@@ -171,7 +170,7 @@ async function buildAuth(userId: string): Promise<Auth | null> {
   }
 
   const clubs: ClubInfo[] = allClubs.map((c) => {
-    const r = roles.find((x) => x.club_id === c.id)?.role as AppRole | undefined;
+    const r = safeRoles.find((x) => x.club_id === c.id)?.role as AppRole | undefined;
     // Creators are not members; they are shown as Owner-equivalent ("Support") in their club list.
     return { id: c.id, name: c.name, role: r ?? "owner" };
   });
@@ -190,7 +189,7 @@ async function buildAuth(userId: string): Promise<Auth | null> {
   const supportMode = isCreator && !!activeClub;
   const appRole: AppRole = supportMode
     ? "owner"
-    : (activeClub?.role ?? (isCreator ? "creator" : (roles[0].role as AppRole)));
+    : (activeClub?.role ?? (isCreator ? "creator" : ((safeRoles[0]?.role as AppRole) ?? "player")));
 
   return {
     userId,
