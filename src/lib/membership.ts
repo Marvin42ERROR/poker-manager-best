@@ -131,6 +131,18 @@ export async function updateClubVisibility(clubId: string, isPublic: boolean): P
   if (error) throw error;
 }
 
+/** Rename a club. Allowed for Creator / Owner of that club (enforced by RLS). */
+export async function renameClub(clubId: string, name: string): Promise<void> {
+  const trimmed = name.trim();
+  if (!trimmed) throw new Error("Название клуба не может быть пустым");
+  if (trimmed.length > 80) throw new Error("Название клуба не должно превышать 80 символов");
+  const { error } = await supabase
+    .from("clubs")
+    .update({ name: trimmed })
+    .eq("id", clubId);
+  if (error) throw error;
+}
+
 /** True for Creator / Owner / Co-Owner of the currently-active club. */
 export function canManageActiveClub(opts: {
   isCreator: boolean;
