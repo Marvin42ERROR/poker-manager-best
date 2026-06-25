@@ -175,9 +175,11 @@ function SelectClubPage() {
                     <ShieldCheck className="size-4 text-primary shrink-0" />
                   )}
                   <div className="min-w-0">
-                    <div className="font-medium truncate">{c.name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {auth.isCreator ? "Поддержка (Owner-доступ)" : ROLE_LABEL[c.role]}
+                    <div className="font-medium truncate">
+                      {c.name}{" "}
+                      <span className="text-muted-foreground font-normal">
+                        ({auth.isCreator ? "Support" : ROLE_LABEL[c.role]})
+                      </span>
                     </div>
                   </div>
                 </div>

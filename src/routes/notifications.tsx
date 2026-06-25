@@ -22,6 +22,7 @@ import {
   getClubSettings,
   listPendingRequestsForMe,
   rejectMembershipRequest,
+  renameClub,
   updateClubVisibility,
   type AppRole,
   type ClubSettings,
@@ -56,9 +57,34 @@ function NotificationsPage() {
   const [settings, setSettings] = useState<ClubSettings | null>(null);
   const [roleByRequest, setRoleByRequest] = useState<Record<string, AppRole>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const [renaming, setRenaming] = useState(false);
 
   const canGrantOwner =
     !!auth && (auth.isCreator || auth.appRole === "owner");
+  const canRenameClub =
+    !!auth && (auth.isCreator || auth.appRole === "owner");
+
+  useEffect(() => {
+    setRenameValue(auth?.activeClubName ?? "");
+  }, [auth?.activeClubName, auth?.activeClubId]);
+
+  const handleRename = async () => {
+    if (!auth?.activeClubId) return;
+    const next = renameValue.trim();
+    if (!next || next === auth.activeClubName) return;
+    setRenaming(true);
+    try {
+      await renameClub(auth.activeClubId, next);
+      toast.success("Название клуба обновлено");
+      // Refresh auth snapshot so header/switcher show the new name.
+      if (typeof window !== "undefined") window.location.reload();
+    } catch (e: any) {
+      toast.error(e.message ?? "Не удалось переименовать клуб");
+    } finally {
+      setRenaming(false);
+    }
+  };
 
   const refresh = async () => {
     setLoading(true);
@@ -160,6 +186,34 @@ function NotificationsPage() {
               <ShieldCheck className="size-5 text-primary" />
               <h2 className="font-semibold">Настройки доступа клуба</h2>
             </div>
+            {canRenameClub && (
+              <div>
+                <div className="text-sm font-medium mb-1">Название клуба</div>
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={renameValue}
+                    onChange={(e) => setRenameValue(e.target.value)}
+                    maxLength={80}
+                    placeholder="Например: Poker House"
+                    className="max-w-[320px]"
+                  />
+                  <Button
+                    size="sm"
+                    onClick={handleRename}
+                    disabled={
+                      renaming ||
+                      !renameValue.trim() ||
+                      renameValue.trim() === auth?.activeClubName
+                    }
+                  >
+                    Сохранить
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Видно всем участникам клуба. До 80 символов.
+                </p>
+              </div>
+            )}
             <div className="flex items-center justify-between gap-4">
               <div>
                 <div className="text-sm font-medium">Публичный клуб</div>
