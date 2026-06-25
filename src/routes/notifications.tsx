@@ -22,6 +22,7 @@ import {
   getClubSettings,
   listPendingRequestsForMe,
   rejectMembershipRequest,
+  renameClub,
   updateClubVisibility,
   type AppRole,
   type ClubSettings,
