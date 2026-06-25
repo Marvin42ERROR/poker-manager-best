@@ -66,11 +66,20 @@ function LoginPage() {
           setErr("Укажите ваше имя");
           return;
         }
+        const trimmedClub = clubName.trim();
+        if (!trimmedClub) {
+          setErr("Укажите название клуба");
+          return;
+        }
+        if (trimmedClub.length > 80) {
+          setErr("Название клуба не должно превышать 80 символов");
+          return;
+        }
         const r = await signUp({
           email: email.trim(),
           password: pwd,
           displayName: displayName.trim(),
-          clubName: clubName.trim(),
+          clubName: trimmedClub,
         });
         if (!r.ok) {
           setErr(translateAuthError(r.error));
