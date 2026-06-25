@@ -186,6 +186,34 @@ function NotificationsPage() {
               <ShieldCheck className="size-5 text-primary" />
               <h2 className="font-semibold">Настройки доступа клуба</h2>
             </div>
+            {canRenameClub && (
+              <div>
+                <div className="text-sm font-medium mb-1">Название клуба</div>
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={renameValue}
+                    onChange={(e) => setRenameValue(e.target.value)}
+                    maxLength={80}
+                    placeholder="Например: Poker House"
+                    className="max-w-[320px]"
+                  />
+                  <Button
+                    size="sm"
+                    onClick={handleRename}
+                    disabled={
+                      renaming ||
+                      !renameValue.trim() ||
+                      renameValue.trim() === auth?.activeClubName
+                    }
+                  >
+                    Сохранить
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Видно всем участникам клуба. До 80 символов.
+                </p>
+              </div>
+            )}
             <div className="flex items-center justify-between gap-4">
               <div>
                 <div className="text-sm font-medium">Публичный клуб</div>
