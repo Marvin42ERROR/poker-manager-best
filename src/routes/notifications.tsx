@@ -57,9 +57,34 @@ function NotificationsPage() {
   const [settings, setSettings] = useState<ClubSettings | null>(null);
   const [roleByRequest, setRoleByRequest] = useState<Record<string, AppRole>>({});
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const [renaming, setRenaming] = useState(false);
 
   const canGrantOwner =
     !!auth && (auth.isCreator || auth.appRole === "owner");
+  const canRenameClub =
+    !!auth && (auth.isCreator || auth.appRole === "owner");
+
+  useEffect(() => {
+    setRenameValue(auth?.activeClubName ?? "");
+  }, [auth?.activeClubName, auth?.activeClubId]);
+
+  const handleRename = async () => {
+    if (!auth?.activeClubId) return;
+    const next = renameValue.trim();
+    if (!next || next === auth.activeClubName) return;
+    setRenaming(true);
+    try {
+      await renameClub(auth.activeClubId, next);
+      toast.success("Название клуба обновлено");
+      // Refresh auth snapshot so header/switcher show the new name.
+      if (typeof window !== "undefined") window.location.reload();
+    } catch (e: any) {
+      toast.error(e.message ?? "Не удалось переименовать клуб");
+    } finally {
+      setRenaming(false);
+    }
+  };
 
   const refresh = async () => {
     setLoading(true);
