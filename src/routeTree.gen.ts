@@ -13,6 +13,7 @@ import { Route as SelectClubRouteImport } from './routes/select-club'
 import { Route as PlayersRouteImport } from './routes/players'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as NoAccessRouteImport } from './routes/no-access'
+import { Route as MembersRouteImport } from './routes/members'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as GamesRouteImport } from './routes/games'
 import { Route as ExpensesRouteImport } from './routes/expenses'
@@ -37,6 +38,11 @@ const NotificationsRoute = NotificationsRouteImport.update({
 const NoAccessRoute = NoAccessRouteImport.update({
   id: '/no-access',
   path: '/no-access',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MembersRoute = MembersRouteImport.update({
+  id: '/members',
+  path: '/members',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/expenses': typeof ExpensesRoute
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
+  '/members': typeof MembersRoute
   '/no-access': typeof NoAccessRoute
   '/notifications': typeof NotificationsRoute
   '/players': typeof PlayersRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/expenses': typeof ExpensesRoute
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
+  '/members': typeof MembersRoute
   '/no-access': typeof NoAccessRoute
   '/notifications': typeof NotificationsRoute
   '/players': typeof PlayersRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/expenses': typeof ExpensesRoute
   '/games': typeof GamesRoute
   '/login': typeof LoginRoute
+  '/members': typeof MembersRoute
   '/no-access': typeof NoAccessRoute
   '/notifications': typeof NotificationsRoute
   '/players': typeof PlayersRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/expenses'
     | '/games'
     | '/login'
+    | '/members'
     | '/no-access'
     | '/notifications'
     | '/players'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/expenses'
     | '/games'
     | '/login'
+    | '/members'
     | '/no-access'
     | '/notifications'
     | '/players'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/expenses'
     | '/games'
     | '/login'
+    | '/members'
     | '/no-access'
     | '/notifications'
     | '/players'
@@ -141,6 +153,7 @@ export interface RootRouteChildren {
   ExpensesRoute: typeof ExpensesRoute
   GamesRoute: typeof GamesRoute
   LoginRoute: typeof LoginRoute
+  MembersRoute: typeof MembersRoute
   NoAccessRoute: typeof NoAccessRoute
   NotificationsRoute: typeof NotificationsRoute
   PlayersRoute: typeof PlayersRoute
@@ -175,6 +188,13 @@ declare module '@tanstack/react-router' {
       path: '/no-access'
       fullPath: '/no-access'
       preLoaderRoute: typeof NoAccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/members': {
+      id: '/members'
+      path: '/members'
+      fullPath: '/members'
+      preLoaderRoute: typeof MembersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -221,6 +241,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExpensesRoute: ExpensesRoute,
   GamesRoute: GamesRoute,
   LoginRoute: LoginRoute,
+  MembersRoute: MembersRoute,
   NoAccessRoute: NoAccessRoute,
   NotificationsRoute: NotificationsRoute,
   PlayersRoute: PlayersRoute,
@@ -229,13 +250,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

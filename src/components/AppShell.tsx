@@ -15,8 +15,9 @@ import { canManageActiveClub } from "@/lib/membership";
 
 
 type LegacyRole = "admin" | "player";
-const NAV: { to: "/games" | "/players" | "/expenses" | "/cash"; label: string; roles: LegacyRole[] }[] = [
+const NAV: { to: "/games" | "/players" | "/expenses" | "/cash" | "/members"; label: string; roles: LegacyRole[] }[] = [
   { to: "/games", label: "Игры", roles: ["admin", "player"] },
+  { to: "/members", label: "Участники", roles: ["admin", "player"] },
   { to: "/players", label: "Досье", roles: ["admin"] },
   { to: "/expenses", label: "Затраты", roles: ["admin"] },
   { to: "/cash", label: "Итоговый кэш", roles: ["admin"] },

@@ -65,6 +65,56 @@ export type Database = {
           },
         ]
       }
+      club_members: {
+        Row: {
+          club_id: string
+          created_at: string
+          display_name: string
+          id: string
+          joined_at: string
+          left_at: string | null
+          notes: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          club_id: string
+          created_at?: string
+          display_name: string
+          id?: string
+          joined_at?: string
+          left_at?: string | null
+          notes?: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          club_id?: string
+          created_at?: string
+          display_name?: string
+          id?: string
+          joined_at?: string
+          left_at?: string | null
+          notes?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "club_members_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       club_settings: {
         Row: {
           club_id: string
@@ -266,6 +316,13 @@ export type Database = {
         Args: { _request_id: string }
         Returns: undefined
       }
+      change_member_role: {
+        Args: {
+          _member_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: undefined
+      }
       count_pending_requests_for_me: { Args: never; Returns: number }
       end_support_session: { Args: { _session_id: string }; Returns: undefined }
       find_club_by_invite: {
@@ -301,6 +358,19 @@ export type Database = {
         Args: { _club_id: string; _user_id: string }
         Returns: boolean
       }
+      leave_club: { Args: { _club_id: string }; Returns: undefined }
+      list_club_members: {
+        Args: { _club_id: string }
+        Returns: {
+          display_name: string
+          id: string
+          joined_at: string
+          left_at: string
+          role: Database["public"]["Enums"]["app_role"]
+          status: string
+          user_id: string
+        }[]
+      }
       list_pending_requests_for_me: {
         Args: never
         Returns: {
@@ -325,6 +395,11 @@ export type Database = {
       }
       reject_membership_request: {
         Args: { _request_id: string }
+        Returns: undefined
+      }
+      remove_member: { Args: { _member_id: string }; Returns: undefined }
+      rename_member: {
+        Args: { _display_name: string; _member_id: string }
         Returns: undefined
       }
       request_club_access: {
